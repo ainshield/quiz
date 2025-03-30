@@ -29,7 +29,7 @@
             $shuffledOptions[$key] = $options[$key];
         }
         $row['options'] = $shuffledOptions;
-        $questions[] = $row;
+        $questions[] = $row; // Ensure explanation is part of the row
     }
 
     $_SESSION['quiz_questions'] = $questions;
@@ -97,8 +97,9 @@
                         `).join('')}
                     </div>
                 </div>
+                <div id="answerExplanation" style="display: none; margin-top: 10px;"></div>
             `;
-            
+
             updateQuestionCounter();
 
             document.getElementById('nextBtn').style.display = 'none';
@@ -126,6 +127,11 @@
                     label.classList.add('wrong');
                 }
             });
+
+            // Show explanation
+            const explanationDiv = document.getElementById('answerExplanation');
+            explanationDiv.style.display = 'block';
+            explanationDiv.innerHTML = `<strong>Explanation:</strong> ${question.explanation}`;
 
             document.getElementById('nextBtn').style.display = 'block';
             document.getElementById('submitAnswerBtn').style.display = 'none';
@@ -180,3 +186,4 @@
     </script>
 </body>
 </html>
+

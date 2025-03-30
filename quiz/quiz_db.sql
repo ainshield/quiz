@@ -49,10 +49,10 @@ DROP TABLE IF EXISTS `modules`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `modules` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `module_name` varchar(255) NOT NULL,
-  `url` varchar(2048) NOT NULL,
+  `module_name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `url` varchar(2048) COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -191,11 +191,11 @@ DROP TABLE IF EXISTS `users`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `users` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `username` varchar(16) NOT NULL,
-  `password` varchar(16) NOT NULL,
-  `role` varchar(16) NOT NULL,
+  `username` varchar(16) COLLATE utf8mb4_general_ci NOT NULL,
+  `password` varchar(16) COLLATE utf8mb4_general_ci NOT NULL,
+  `role` varchar(16) COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -217,4 +217,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-03-31  4:01:57
+-- Dump completed on 2025-03-31  4:06:24
