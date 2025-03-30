@@ -1,0 +1,164 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    background: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    overflow-y: hidden;
+}
+.sidebar {
+            width: 250px;
+            height: 100vh;
+            background: #34495E;
+            color: white;
+            padding-top: 20px;
+            position: fixed;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar .menu {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar .menu li {
+            padding: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: 0.3s;
+        }
+
+        .sidebar .menu li:hover {
+            background: #1A252F;
+        }
+
+        .sidebar .menu li a {
+            color: white;
+            text-decoration: none;
+            margin-left: 10px;
+            font-size: 1.1em;
+        }
+
+        .logout-container {
+            padding: 15px;
+        }
+
+        .logout-button {
+            background: #E74C3C;
+            color: white;
+            padding: 12px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: 0.3s;
+            width: 100%;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logout-button:hover {
+            background: #C0392B;
+        }
+
+.main-content {
+    margin-left: 260px;
+    padding: 20px;
+    width: calc(100% - 260px);
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    height: 96vh; /* Make the card fit the screen height */
+    box-sizing: border-box; /* Ensure padding is included in height */
+    overflow-y: hidden; /* Add scroll if content overflows */
+    height: 90vh;
+}
+
+.card:hover{
+    transform: none;
+}
+
+.card-header h2 {
+    margin: 0;
+    font-size: 22px;
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    font-weight: 600;
+    display: block;
+    margin-bottom: 5px;
+}
+
+textarea, input, select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.btn-primary {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.btn-primary:hover {
+    background: #2980b9;
+}
+
+.table-container {
+    max-height: 80vh; /* Adjust based on screen size */
+    overflow-y: auto;
+    border: 1px solid #ddd;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table th, table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+table th {
+    background: #2c3e50;
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 2; /* Ensure it stays above content */
+}
+
+
+.btn-danger {
+    background: #e74c3c;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+.btn-danger:hover {
+    background: #c0392b;
+}

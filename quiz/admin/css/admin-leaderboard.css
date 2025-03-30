@@ -1,22 +1,4 @@
-<?php
-session_start();
-
-$conn = new mysqli("localhost", "root", "", "quiz_db");
-
-$sql = "SELECT username, score FROM student_credentials ORDER BY score DESC LIMIT 10";
-$result = $conn->query($sql);
-
-?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oral Communication Admin Panel</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
-    <style>
-          body {
+body {
             font-family: 'Poppins', sans-serif;
             margin: 0;
             display: flex;
@@ -157,60 +139,3 @@ $result = $conn->query($sql);
         .dark-mode table th {
             background-color: #1abc9c;
         }
-    </style>
-</head>
-<body>
-
-    <div class="sidebar">
-        <ul class="menu">
-            <li><i class="fas fa-home"></i><a href="admin-dashboard.php"> Dashboard</a></li>
-            <li><i class="fas fa-plus-circle"></i><a href="admin-new.php"> Add Question</a></li>
-            <li><i class="fas fa-trophy"></i><a href="admin-new-leaderboard.php"> Leaderboard</a></li>
-        </ul>
-        <div class="logout-container">
-            <form action="logout.php" method="post">
-                <button class="logout-button" type="submit"><i class="fas fa-sign-out-alt"></i> Logout</button>
-            </form>
-        </div>
-    </div>
-
-    
-
-    <div class="main-content">
-    <div class="main-content" >
-        <div id="leaderboardContainer">
-        <h1>Admin Leaderboard</h1>
-        
-        <table>
-            <thead>
-                <tr>
-                    <th>Rank</th>
-                    <th>Username</th>
-                    <th>Score</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php
-                if ($result->num_rows > 0) {
-                    $rank = 1;
-                    while ($row = $result->fetch_assoc()) {
-                        echo "<tr>
-                                <td>{$rank}</td>
-                                <td>{$row['username']}</td>
-                                <td>{$row['score']}</td>
-                              </tr>";
-                        $rank++;
-                    }
-                } else {
-                    echo "<tr><td colspan='3'>No students found</td></tr>";
-                }
-                ?>
-            </tbody>
-        </table>
-    </div>
-    </div>
-
-    </div>
-
-</body>
-</html>

@@ -7,180 +7,84 @@ $password = "";
 $dbname = "quiz_db";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
-
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$error = "";
-$success = "";
-$first_name = $last_name = $lrn = $strand = $grade_level = $section = $username = "";
-
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $first_name = trim($_POST['first_name']);
-    $last_name = trim($_POST['last_name']);
-    $lrn = trim($_POST['lrn']);
-    $strand = trim($_POST['strand']);
-    $grade_level = trim($_POST['grade_level']);
-    $section = trim($_POST['section']);
-    $username = trim($_POST['username']);
-    $password = $_POST['password'];
-
-    // Check if fields are empty
-    if (empty($first_name) || empty($last_name) || empty($lrn) || empty($strand) || empty($grade_level) || empty($section) || empty($username) || empty($password)) {
-        $error = "All fields are required!";
-    }
-    // Validate LRN (ensure it's numeric)
-    elseif (!is_numeric($lrn)) {
-        $error = "LRN must be a numeric value.";
-    }
-    // Validate username (alphanumeric)
-    elseif (!preg_match("/^[a-zA-Z0-9]*$/", $username)) {
-        $error = "Username can only contain letters and numbers.";
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $user = $_POST['username'];
+    $pass = $_POST['password'];
+    $repass = $_POST['repassword'];
+    $role = "user"; // Default role set to user
+    
+    if ($pass !== $repass) {
+        $error = "Passwords do not match.";
     } else {
         // Check if username already exists
-        $check_sql = "SELECT * FROM student_registration WHERE username = ?";
-        $check_stmt = $conn->prepare($check_sql);
-        $check_stmt->bind_param("s", $username);
-        $check_stmt->execute();
-        $result = $check_stmt->get_result();
-
-        if ($result->num_rows > 0) {
-            $error = "Username already taken. Please choose a different one.";
+        $checkUser = $conn->query("SELECT * FROM users WHERE username = '$user'");
+        if ($checkUser->num_rows > 0) {
+            $error = "Username already exists.";
         } else {
-            // Hash the password for storage
-            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-            
-            // Insert user into database
-            $sql = "INSERT INTO student_registration (first_name, last_name, lrn, strand, grade_level, section, username, password) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-            $stmt = $conn->prepare($sql);
-            $stmt->bind_param("ssssssss", $first_name, $last_name, $lrn, $strand, $grade_level, $section, $username, $hashed_password);
-
+            // Insert new user
+            $stmt = $conn->prepare("INSERT INTO users (username, password, role) VALUES (?, ?, ?)");
+            $stmt->bind_param("sss", $user, $pass, $role);
             if ($stmt->execute()) {
-                $_SESSION['registered'] = true;
-                $success = "Registration successful! Redirecting...";
-                header("refresh:3; url=member-login.php"); // Redirect after 3 seconds
-                exit();
+                $success = "Registration successful! You can now <a href='index.php'>login</a>.";
             } else {
                 $error = "Registration failed. Please try again.";
             }
+            $stmt->close();
         }
     }
 }
+$conn->close();
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registration Form</title>
-    <style>
-        body {
-            font-family: "Poppins", sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f4f4f4;
-        }
-        .container {
-            width: 400px;
-            padding: 30px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-        h2 {
-            font-size: 2em;
-            margin-bottom: 20px;
-        }
-        .input-container {
-            position: relative;
-            width: 100%;
-            margin-bottom: 15px;
-        }
-        .input-field {
-            width: 100%;
-            padding: 12px 15px;
-            font-size: 16px;
-            border: 2px solid #0056b3;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        .register-button {
-            background-color: #0056b3;
-            color: white;
-            padding: 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            width: 100%;
-            font-size: 16px;
-        }
-        .register-button:hover {
-            background-color: #007BFF;
-        }
-        .message {
-            margin-top: 10px;
-            font-weight: bold;
-        }
-        .error {
-            color: red;
-        }
-        .success {
-            color: green;
-        }
-    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Register - Oral Communication Quiz App</title> 
 </head>
 <body>
-    <div class="container">
-        <h2>Register</h2>
-        <form method="POST">
-            <div class="input-container">
-                <input type="text" class="input-field" name="first_name" placeholder="First Name" value="<?= htmlspecialchars($first_name) ?>" required>
+<section class="vh-100" style="background-color:rgb(47, 95, 41);">
+  <div class="container py-5 h-100">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+      <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+        <div class="card shadow-2-strong" style="border-radius: 1rem;">
+          <div class="card-body p-5 text-center">
+            <h3 class="mb-5">Register</h3>
+
+            <?php if (isset($error)) echo "<div class='alert alert-danger'>$error</div>"; ?>
+            <?php if (isset($success)) echo "<div class='alert alert-success'>$success</div>"; ?>
+
+            <form method="POST" >
+              <div class="form-outline mb-4 d-flex align-items-center">
+                <label class="form-label me-3" for="username" style="min-width: 100px;">Username</label>
+                <input type="text" id="username" name="username" class="form-control form-control-lg" required />
+              </div>
+
+              <div class="form-outline mb-4 d-flex align-items-center">
+                <label class="form-label me-3" for="password" style="min-width: 100px;">Password</label>
+                <input type="password" id="password" name="password" class="form-control form-control-lg" required />
+              </div>
+              
+              <div class="form-outline mb-4 d-flex align-items-center">
+                <label class="form-label me-3" for="repassword" style="min-width: 100px;">Retype Password</label>
+                <input type="password" id="repassword" name="repassword" class="form-control form-control-lg" required />
+              </div>
+
+              <button class="btn btn-primary btn-lg btn-block" type="submit">Register</button>
+            </form>
+            <div style="margin-top: 10px;">
+              <a class="btn btn-primary btn-lg btn-block" href="index.php" role="button">Back to Login</a>
             </div>
-            <div class="input-container">
-                <input type="text" class="input-field" name="last_name" placeholder="Last Name" value="<?= htmlspecialchars($last_name) ?>" required>
-            </div>
-            <div class="input-container">
-                <input type="text" class="input-field" name="lrn" placeholder="LRN" value="<?= htmlspecialchars($lrn) ?>" required>
-            </div>
-            <div class="input-container">
-                <select name="strand" class="input-field" required>
-                    <option value="" disabled <?= empty($strand) ? "selected" : "" ?>>Select Strand</option>
-                    <option value="ABM" <?= $strand == "ABM" ? "selected" : "" ?>>ABM</option>
-                    <option value="HUMSS" <?= $strand == "HUMSS" ? "selected" : "" ?>>HUMSS</option>
-                    <option value="STEM" <?= $strand == "STEM" ? "selected" : "" ?>>STEM</option>
-                    <option value="GAS" <?= $strand == "GAS" ? "selected" : "" ?>>GAS</option>
-                    <option value="ICT" <?= $strand == "ICT" ? "selected" : "" ?>>ICT</option> 
-                </select>
-            </div>
-            <div class="input-container">
-                <select name="grade_level" class="input-field" required>
-                    <option value="" disabled <?= empty($grade_level) ? "selected" : "" ?>>Select Grade Level</option>
-                    <option value="11" <?= $grade_level == "11" ? "selected" : "" ?>>Grade 11</option>
-                    <option value="12" <?= $grade_level == "12" ? "selected" : "" ?>>Grade 12</option>
-                </select>
-            </div>
-            <div class="input-container">
-                <input type="text" class="input-field" name="section" placeholder="Section" value="<?= htmlspecialchars($section) ?>" required>
-            </div>
-            <div class="input-container">
-                <input type="text" class="input-field" name="username" placeholder="Username" value="<?= htmlspecialchars($username) ?>" required>
-            </div>
-            <div class="input-container">
-                <input type="password" class="input-field" name="password" placeholder="Password" required>
-            </div>
-            <button class="register-button" type="submit">Register</button>
-        </form>
-        <div class="message">
-            <?php if (!empty($error)) echo "<p class='error'>$error</p>"; ?>
-            <?php if (!empty($success)) echo "<p class='success'>$success</p>"; ?>
+            <hr class="my-4">
+          </div>
         </div>
+      </div>
     </div>
+  </div>
+</section>
 </body>
 </html>

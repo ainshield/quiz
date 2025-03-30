@@ -35,133 +35,33 @@
     $_SESSION['quiz_questions'] = $questions;
     $_SESSION['score'] = 0;
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Member Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: "Montserrat", sans-serif;
-            margin: 0;
-            height: auto;
-            background-color: #e0f7fa;
-            color: #333;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: #00796b;
-            color: white;
-            padding: 15px 30px;
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .logo {
-            font-size: 1.8em;
-            font-weight: 600;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-        }
-
-        .profile-icon {
-            width: 40px;
-            height: 40px;
-            background-color: white;
-            color: #00796b;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2em;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .dashboard {
-            display: flex;
-            height: calc(100vh - 80px);
-        }
-
-        .sidebar {
-            background-color: #004d40;
-            color: white;
-            width: 250px;
-            padding: 20px;
-            height: 200vh;
-            box-shadow: 3px 0 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .sidebar ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .sidebar ul li {
-            padding: 12px;
-            margin: 10px 0;
-            background-color: #00695c;
-            border-radius: 5px;
-            cursor: pointer;
-            text-align: center;
-            font-weight: 500;
-        }
-
-        .sidebar ul li:hover {
-            background-color: #00897b;
-        }
-
-        .content {
-            flex: 1;
-            padding: 30px;
-        }
-
-        .card {
-            background-color: white;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .card h3 {
-            margin-bottom: 10px;
-        }
-
-    </style>
+    <title>Student Dashboard</title>
+    <?php include_once '../vendor/bootstrap.php'; ?>
+    <link rel="stylesheet" href="css/quiz.css">
+    <link rel="stylesheet" href="css/sidebar.css">
 </head>
 <body>
-    <div class="header">
-        <div class="logo">Oral Communication</div>
-        <div class="user-info">
-            <div class="profile-icon" id="profile-icon">
-                <?php echo strtoupper(substr($username, 0, 1)); ?>
-            </div>
-        </div>
-    </div>
-    
-    <div class="dashboard">
-        <div class="sidebar">
-            <ul>
-                <li>Lesson 2: Understanding Speech</li>
-            </ul>
-        </div>
-
-        <div class="content">
-            <div id="quizContainer">
-                <h1>Lesson 2 : Exercise</h1>
-                <div id="questionContainer"></div>
-                <div id="questionCounter"></div>
-                <div class="next-btn-container">
-                    <button id="submitAnswerBtn" onclick="checkAnswer()">Submit Answer</button>
-                    <button id="nextBtn" onclick="loadNextQuestion()" style="display: none;">Next Question</button>
+    <?php include_once 'sidebar.php'; ?>
+    <div class="header" style="background-color: #004d40;">Quiz</div>
+    <div class="main-content justify-content-center">
+        <div class="card" style="width: auto; height: 85vh;">
+            <div class="card-body">
+                <div class="content">
+                    <div id="quizContainer">
+                        <h1>Quiz</h1>
+                        <div id="questionContainer"></div>
+                        <div id="questionCounter"></div>
+                        <div class="next-btn-container">
+                            <button id="submitAnswerBtn" onclick="checkAnswer()">Submit Answer</button>
+                            <button id="nextBtn" onclick="loadNextQuestion()" style="display: none;">Next Question</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -238,7 +138,7 @@
                 formData.append(`answers[${questionId}]`, userAnswer);
             }
 
-            fetch('check_answers.php', {
+            fetch('quiz/check_answers.php', {
                 method: 'POST',
                 body: formData
             })
