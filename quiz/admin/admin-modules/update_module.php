@@ -11,14 +11,14 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['module_name'], $_POST['url'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['module_name'], $_POST['content'])) {
     $id = (int) $_POST['id'];
     $module_name = trim($_POST['module_name']);
-    $url = trim($_POST['url']);
+    $content = trim($_POST['content']);
 
     // Prepare & execute update query
-    $stmt = $conn->prepare("UPDATE modules SET module_name = ?, url = ? WHERE id = ?");
-    $stmt->bind_param("ssi", $module_name, $url, $id);
+    $stmt = $conn->prepare("UPDATE modules SET module_name = ?, content = ? WHERE id = ?");
+    $stmt->bind_param("ssi", $module_name, $content, $id);
     
     if ($stmt->execute()) {
         echo json_encode(["success" => true]);

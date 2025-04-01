@@ -11,13 +11,13 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['module_name'], $_POST['url'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['module_name'], $_POST['content'])) {
     $module_name = trim($_POST['module_name']);
-    $url = trim($_POST['url']);
+    $content = trim($_POST['content']);
 
     // Prepare & execute insert query
-    $stmt = $conn->prepare("INSERT INTO modules (module_name, url) VALUES (?, ?)");
-    $stmt->bind_param("ss", $module_name, $url);
+    $stmt = $conn->prepare("INSERT INTO modules (module_name, content) VALUES (?, ?)");
+    $stmt->bind_param("ss", $module_name, $content);
     
     if ($stmt->execute()) {
         echo json_encode(["success" => true]);
