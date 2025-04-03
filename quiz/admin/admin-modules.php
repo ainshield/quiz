@@ -26,6 +26,7 @@ $result = $conn->query($query);
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="css/admin-dash.css">
     <link rel="stylesheet" href="css/admin-sidebar.css">
+    <link rel="stylesheet" href="css/module-sidebar.css">
 
     <style>
         .truncate-text {
@@ -59,45 +60,117 @@ $result = $conn->query($query);
             height: 70vh; /* Increase textarea height */
         }
     </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Ensure "Add Module" button works
+            const addButton = document.getElementById("add-module-btn");
+            if (addButton) {
+                addButton.addEventListener("click", function () {
+                    showModuleForm();
+                });
+            }
+        });
+
+        // Function to dynamically show the module form inside the card
+        function showModuleForm(moduleId = '', moduleName = '', moduleContent = '') {
+            const cardBody = document.getElementById("module-card-body");
+
+            // Inject form into the card
+            cardBody.innerHTML = `
+                <h5>${moduleId ? 'Edit Module' : 'Add New Module'}</h5>
+                <input type="hidden" id="module-id" value="${moduleId}">
+                <input type="text" id="module-name" class="form-control mt-2" placeholder="Module Name" value="${moduleName}">
+                <textarea id="module-content" class="form-control mt-2" placeholder="Module Content" style="max-height: 50vh; min-height: 50vh;">${moduleContent}</textarea>
+                <button class="btn btn-success mt-3" onclick="saveModule()">
+                    ${moduleId ? 'Save Changes' : 'Add Module'}
+                </button>
+                <button class="btn btn-secondary mt-3" onclick="cancelForm()">Cancel</button>
+            `;
+        }
+
+        // Function to remove the form when "Cancel" is clicked
+        function cancelForm() {
+            document.getElementById("module-card-body").innerHTML = "";
+        }
+
+        // Function to handle add/edit module
+        function saveModule() {
+            let id = document.getElementById("module-id").value;
+            let name = document.getElementById("module-name").value.trim();
+            let content = document.getElementById("module-content").value.trim();
+
+            if (!name) {
+                alert("Module name cannot be empty.");
+                return;
+            }
+
+            let url = id ? 'admin-modules/update_module.php' : 'admin-modules/add_module.php';
+            let body = id 
+                ? `id=${id}&module_name=${encodeURIComponent(name)}&content=${encodeURIComponent(content)}` 
+                : `module_name=${encodeURIComponent(name)}&content=${encodeURIComponent(content)}`;
+
+            fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: body
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(id ? 'Module updated successfully!' : 'Module added successfully!');
+                    location.reload();
+                } else {
+                    alert('Failed to process request.');
+                }
+            });
+        }
+
+        // Function to open edit mode
+        function editModule(id, name, content) {
+            // Decode HTML entities
+            const tempElement = document.createElement("textarea");
+            tempElement.innerHTML = content;
+            const decodedContent = tempElement.value;
+
+            showModuleForm(id, name, decodedContent);
+        }
+    </script>
+
 </head>
 <body>
     <?php include_once 'admin-sidebar.php'; ?>
     <div class="header" style="background-color: #004d40;">Modules</div>
-    <div class="main-content justify-content-center">
-        <div class="card" style="width: auto; height: auto;">
-            <div class="card-body">
-                <h5>Modules</h5>
-                <button class="btn btn-success" data-toggle="modal" data-target="#addModuleModal">Add New Module</button>
-                <br><br>
-                <div class="table-responsive" style="max-height: 65vh; overflow-y: auto;">
-                    <table class="table table-bordered">
-                        <thead style="position: sticky; top: 0; background-color: white; z-index: 2;">
-                            <tr>
-                                <th>Module Name</th>
-                                <th style="width: 300px;">Content</th> <!-- Adjust width as needed -->
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php while ($module = $result->fetch_assoc()) { ?>
-                            <tr>
-                                <td><?= $module['module_name'] ?></td>
-                                <td class="truncate-text"><?= $module['content'] ?></td>
-                                <td>
-                                    <button class="btn btn-primary" onclick='openEditModal(<?= $module['id'] ?>, <?= json_encode($module['module_name']) ?>, <?= json_encode($module['content']) ?>)'>Edit</button>
-                                    <button class="btn btn-danger" onclick="deleteModule(<?= $module['id'] ?>)">Delete</button>
-                                </td>
-                            </tr>
-                            <?php } ?>
-                        </tbody>
-                    </table>
+    <div class="flex">
+    <div class="container-flex">
+
+        <div class="module-sidebar">
+            <!-- Add Module Button - Fixed at the Top -->
+            <div class="add-module-container">
+                <button id="add-module-btn" class="btn btn-success">Add New Module</button>
+            </div>
+
+            <!-- Scrollable List -->
+            <ul class="menu">
+                <?php while ($module = $result->fetch_assoc()) { ?>
+                    <li class="module-item" 
+                        onclick='editModule(<?= json_encode($module['id']) ?>, <?= json_encode($module['module_name']) ?>, <?= json_encode($module['content']) ?>)'>
+                        <?= htmlspecialchars($module['module_name'], ENT_QUOTES) ?>
+                    </li>
+                <?php } ?>
+            </ul>
+        </div>
+
+        <div class="main-content">
+            <div class="card" style="left: 27vh; width: 140vh; height: 85vh;">
+                <div class="card-body" id="module-card-body">
+                    <!-- This ID was missing, now it's added -->
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Add Module Modal -->
-    <div class="modal fade" id="addModuleModal" tabindex="-1" role="dialog">
+    <!-- <div class="modal fade" id="addModuleModal" tabindex="-1" role="dialog">
         <div class="modal-dialog custom-modal" role="document"> 
             <div class="modal-content">
                 <div class="modal-header">
@@ -114,10 +187,10 @@ $result = $conn->query($query);
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <!-- Edit Module Modal -->
-    <div class="modal fade" id="editModuleModal" tabindex="-1" role="dialog">
+    <!-- <div class="modal fade" id="editModuleModal" tabindex="-1" role="dialog">
         <div class="modal-dialog custom-modal" role="document"> 
             <div class="modal-content">
                 <div class="modal-header">
@@ -135,93 +208,8 @@ $result = $conn->query($query);
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 
-    <script>
-        // Function to handle tab key in textarea
-        document.addEventListener("DOMContentLoaded", function () {
-            document.querySelectorAll("textarea").forEach(textarea => {
-                textarea.addEventListener("keydown", function (event) {
-                    if (event.key === "Tab") {
-                        event.preventDefault(); // Prevent default tabbing behavior
-                        
-                        let start = this.selectionStart;
-                        let end = this.selectionEnd;
-
-                        // Insert a tab character at the cursor position
-                        this.value = this.value.substring(0, start) + "\t" + this.value.substring(end);
-
-                        // Move the cursor after the inserted tab
-                        this.selectionStart = this.selectionEnd = start + 1;
-                    }
-                });
-            });
-        });
-        
-        function addModule() {
-            let name = document.getElementById('new-module-name').value;
-            let content = document.getElementById('new-module-content').value;
-
-            fetch('admin-modules/add_module.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `module_name=${encodeURIComponent(name)}&content=${encodeURIComponent(content)}`
-            }).then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Module added successfully!');
-                    location.reload();
-                } else {
-                    alert('Failed to add module.');
-                }
-            });
-        }
-
-        function openEditModal(id, name, content) {
-            document.getElementById('edit-module-id').value = id;
-            document.getElementById('edit-module-name').value = name;
-            document.getElementById('edit-module-content').value = content.replace(/\\n/g, "\n").replace(/\\t/g, "\t");
-
-            $('#editModuleModal').modal('show');
-        }
-
-        function saveModule() {
-            let id = document.getElementById('edit-module-id').value;
-            let name = document.getElementById('edit-module-name').value;
-            let content = document.getElementById('edit-module-content').value;
-
-            fetch('admin-modules/update_module.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `id=${id}&module_name=${encodeURIComponent(name)}&content=${encodeURIComponent(content)}`
-            }).then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Module updated successfully!');
-                    location.reload();
-                } else {
-                    alert('Failed to update module.');
-                }
-            });
-        }
-
-        function deleteModule(id) {
-            if (confirm('Are you sure you want to delete this module?')) {
-                fetch('admin-modules/delete_module.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `id=${id}`
-                }).then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Module deleted successfully!');
-                        location.reload();
-                    } else {
-                        alert('Failed to delete module.');
-                    }
-                });
-            }
-        }
-    </script>
+    
 </body>
 </html>

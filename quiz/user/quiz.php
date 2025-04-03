@@ -109,7 +109,7 @@
         function checkAnswer() {
             const selectedOption = document.querySelector('input[name="answer"]:checked');
             if (!selectedOption) {
-                alert('Please select an answer before proceeding.');
+                alert('Please select an answer before proceeding.'); 
                 return;
             }
 
