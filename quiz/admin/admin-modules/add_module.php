@@ -1,5 +1,4 @@
 <?php
-session_start();
 $host = "localhost";
 $user = "root";
 $password = "";
@@ -8,23 +7,27 @@ $dbname = "quiz_db";
 $conn = new mysqli($host, $user, $password, $dbname);
 
 if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+    die(json_encode(["success" => false, "message" => "Connection failed"]));
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['module_name'], $_POST['content'])) {
-    $module_name = trim($_POST['module_name']);
-    $content = trim($_POST['content']);
+$moduleName = $_POST['module_name'];
+$moduleContent = $_POST['content'];
+$imageUrl = "";
 
-    // Prepare & execute insert query
-    $stmt = $conn->prepare("INSERT INTO modules (module_name, content) VALUES (?, ?)");
-    $stmt->bind_param("ss", $module_name, $content);
+if (!empty($_FILES["image"]["name"])) {
+    $targetDir = "../../uploads/";  // Make sure this directory exists
+    $fileName = basename($_FILES["image"]["name"]);
+    $targetFilePath = $targetDir . $fileName;
     
-    if ($stmt->execute()) {
-        echo json_encode(["success" => true]);
-    } else {
-        echo json_encode(["success" => false]);
+    if (move_uploaded_file($_FILES["image"]["tmp_name"], $targetFilePath)) {
+        $imageUrl = $targetFilePath;
     }
-
-    $stmt->close();
 }
+
+$query = "INSERT INTO modules (module_name, content, image_url) VALUES (?, ?, ?)";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("sss", $moduleName, $moduleContent, $imageUrl);
+$success = $stmt->execute();
+
+echo json_encode(["success" => $success]);
 ?>

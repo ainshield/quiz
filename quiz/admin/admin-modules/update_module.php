@@ -1,5 +1,4 @@
 <?php
-session_start();
 $host = "localhost";
 $user = "root";
 $password = "";
@@ -8,24 +7,35 @@ $dbname = "quiz_db";
 $conn = new mysqli($host, $user, $password, $dbname);
 
 if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+    die(json_encode(["success" => false, "message" => "Connection failed"]));
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['module_name'], $_POST['content'])) {
-    $id = (int) $_POST['id'];
-    $module_name = trim($_POST['module_name']);
-    $content = trim($_POST['content']);
+$moduleId = $_POST['id'];
+$moduleName = $_POST['module_name'];
+$moduleContent = $_POST['content'];
+$imageUrl = "";
 
-    // Prepare & execute update query
-    $stmt = $conn->prepare("UPDATE modules SET module_name = ?, content = ? WHERE id = ?");
-    $stmt->bind_param("ssi", $module_name, $content, $id);
+if (!empty($_FILES["image"]["name"])) {
+    $targetDir = "../../uploads/";
+    $fileName = basename($_FILES["image"]["name"]);
+    $targetFilePath = $targetDir . $fileName;
     
-    if ($stmt->execute()) {
-        echo json_encode(["success" => true]);
-    } else {
-        echo json_encode(["success" => false]);
+    if (move_uploaded_file($_FILES["image"]["tmp_name"], $targetFilePath)) {
+        $imageUrl = $targetFilePath;
     }
-
-    $stmt->close();
 }
+
+// If image was uploaded, update it too
+if ($imageUrl) {
+    $query = "UPDATE modules SET module_name=?, content=?, image_url=? WHERE id=?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("sssi", $moduleName, $moduleContent, $imageUrl, $moduleId);
+} else {
+    $query = "UPDATE modules SET module_name=?, content=? WHERE id=?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("ssi", $moduleName, $moduleContent, $moduleId);
+}
+
+$success = $stmt->execute();
+echo json_encode(["success" => $success]);
 ?>

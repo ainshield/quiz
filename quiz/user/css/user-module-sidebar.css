@@ -1,0 +1,75 @@
+.module-sidebar {
+    width: 25vh;
+    height: 85vh;
+    background-color: #028872;
+    color: white;
+    padding-top: 20px;
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    top: 10vh;
+    left: 27vh;
+    overflow: hidden; /* Prevents the button from scrolling */
+}
+
+/* Scrollbar customization (optional) */
+.module-sidebar .menu::-webkit-scrollbar {
+    width: 8px;
+}
+
+
+.module-sidebar .menu {
+    list-style: none;
+    padding: 0;
+    overflow-y: auto;
+    flex-grow: 1;
+    padding-top: 10px; /* Space for the button */
+}
+
+.module-sidebar .menu li {
+    padding: 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: 0.3s;
+}
+
+.module-sidebar .menu li:hover {
+    background: #1A252F;
+}
+
+.module-sidebar .menu li a {
+    color: white;
+    text-decoration: none;
+    margin-left: 10px;
+    font-size: 1.1em;
+}
+
+.module-sidebar::-webkit-scrollbar-thumb {
+    background: #1A252F;
+    border-radius: 4px;
+}
+
+.module-sidebar::-webkit-scrollbar-track {
+    background: #028872;
+}
+
+/* Sticky Button Container */
+.add-module-container {
+    position: sticky;
+    bottom: 0;
+    background-color: #028872; /* Match sidebar */
+    padding: 10px;
+    /* box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2); */
+}
+
+.module-item {
+    cursor: pointer;
+    padding: 10px;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.module-item:hover {
+    background-color: #f0f0f0; /* Light gray hover effect */
+}

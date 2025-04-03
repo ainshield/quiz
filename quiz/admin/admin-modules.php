@@ -60,6 +60,7 @@ $result = $conn->query($query);
             height: 70vh; /* Increase textarea height */
         }
     </style>
+
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             // Ensure "Add Module" button works
@@ -70,27 +71,65 @@ $result = $conn->query($query);
                 });
             }
         });
+        
+        function cancelForm() {
+            const cardBody = document.getElementById("module-card-body");
+            cardBody.innerHTML = ""; // Clear the form
+        }
+
+        function clearImage() {
+            const imageInput = document.getElementById("module-image");
+            if (imageInput) {
+                imageInput.value = ""; // Clear the file input
+            }
+        }
 
         // Function to dynamically show the module form inside the card
-        function showModuleForm(moduleId = '', moduleName = '', moduleContent = '') {
+        function showModuleForm(moduleId = '', moduleName = '', moduleContent = '', imageFileName = '') {
             const cardBody = document.getElementById("module-card-body");
 
-            // Inject form into the card
+            // Generate the correct image URL if available
+            let imageUrl = imageFileName ? `http://localhost/quiz/uploads/${imageFileName}` : '';
+
             cardBody.innerHTML = `
                 <h5>${moduleId ? 'Edit Module' : 'Add New Module'}</h5>
                 <input type="hidden" id="module-id" value="${moduleId}">
                 <input type="text" id="module-name" class="form-control mt-2" placeholder="Module Name" value="${moduleName}">
                 <textarea id="module-content" class="form-control mt-2" placeholder="Module Content" style="max-height: 50vh; min-height: 50vh;">${moduleContent}</textarea>
+                
+                <label class="mt-2">Upload Image:</label>
+
+                ${imageUrl ? `<button class="btn btn-info mt-2" onclick="viewImage(${imageUrl})">View Image</button>` : ''}
+
+                <div class="d-flex align-items-center mt-2">
+                    <input type="file" id="module-image" class="form-control mt-2">
+                    <button class="btn btn-warning mt-2" onclick="clearImage()">Clear Image</button>
+                </div>
+                
                 <button class="btn btn-success mt-3" onclick="saveModule()">
                     ${moduleId ? 'Save Changes' : 'Add Module'}
                 </button>
                 <button class="btn btn-secondary mt-3" onclick="cancelForm()">Cancel</button>
+
+                ${moduleId ? `<button class="btn btn-danger mt-3" onclick="deleteModule(${moduleId})">Delete Module</button>` : ''}
             `;
         }
 
-        // Function to remove the form when "Cancel" is clicked
-        function cancelForm() {
-            document.getElementById("module-card-body").innerHTML = "";
+        let currentImageUrl = showModuleForm.imageHtml || '';
+
+        function viewImage(imageUrl) {
+            // Check if the imageUrl exists
+            const modalBody = document.querySelector("#viewImageModal .modal-body");
+
+            // If an image URL exists, display the image
+            if (imageUrl) {
+                modalBody.innerHTML = `<img src="${imageUrl}" alt="Module Image" style="max-width: 100%;">`;
+            } else {
+                modalBody.innerHTML = "No image available.";
+            }
+            
+            // Show the modal
+            $('#viewImageModal').modal('show');
         }
 
         // Function to handle add/edit module
@@ -98,21 +137,28 @@ $result = $conn->query($query);
             let id = document.getElementById("module-id").value;
             let name = document.getElementById("module-name").value.trim();
             let content = document.getElementById("module-content").value.trim();
+            let image = document.getElementById("module-image").files[0];
 
             if (!name) {
                 alert("Module name cannot be empty.");
                 return;
             }
 
+            let formData = new FormData();
+            formData.append("module_name", name);
+            formData.append("content", content);
+            if (image) {
+                formData.append("image", image);
+            }
+            if (id) {
+                formData.append("id", id);
+            }
+
             let url = id ? 'admin-modules/update_module.php' : 'admin-modules/add_module.php';
-            let body = id 
-                ? `id=${id}&module_name=${encodeURIComponent(name)}&content=${encodeURIComponent(content)}` 
-                : `module_name=${encodeURIComponent(name)}&content=${encodeURIComponent(content)}`;
 
             fetch(url, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: body
+                body: formData
             })
             .then(response => response.json())
             .then(data => {
@@ -126,15 +172,40 @@ $result = $conn->query($query);
         }
 
         // Function to open edit mode
-        function editModule(id, name, content) {
+        function editModule(id, name, content, imageUrl) {
             // Decode HTML entities
             const tempElement = document.createElement("textarea");
             tempElement.innerHTML = content;
             const decodedContent = tempElement.value;
 
-            showModuleForm(id, name, decodedContent);
+            showModuleForm(id, name, decodedContent, imageUrl);
         }
+
+        function deleteModule(id) {
+            if (!confirm("Are you sure you want to delete this module?")) {
+                return;
+            }
+
+            fetch('admin-modules/delete_module.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: `id=${id}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Module deleted successfully!');
+                    location.reload();
+                } else {
+                    alert('Failed to delete module.');
+                }
+            });
+        }
+
     </script>
+
 
 </head>
 <body>
@@ -153,7 +224,7 @@ $result = $conn->query($query);
             <ul class="menu">
                 <?php while ($module = $result->fetch_assoc()) { ?>
                     <li class="module-item" 
-                        onclick='editModule(<?= json_encode($module['id']) ?>, <?= json_encode($module['module_name']) ?>, <?= json_encode($module['content']) ?>)'>
+                        onclick='editModule(<?= json_encode($module['id']) ?>, <?= json_encode($module['module_name']) ?>, <?= json_encode($module['content']) ?>, <?= json_encode($module['image_url'] ?? '') ?>)'>
                         <?= htmlspecialchars($module['module_name'], ENT_QUOTES) ?>
                     </li>
                 <?php } ?>
@@ -163,7 +234,28 @@ $result = $conn->query($query);
         <div class="main-content">
             <div class="card" style="left: 27vh; width: 140vh; height: 85vh;">
                 <div class="card-body" id="module-card-body">
-                    <!-- This ID was missing, now it's added -->
+                    <h5>Module Details</h5>
+                    <p>Select a module from the left to view or edit its details.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Image Modal -->
+    <div class="modal fade" id="viewImageModal" tabindex="-1" role="dialog" aria-labelledby="viewImageModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="viewImageModalLabel">View Module Image</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
