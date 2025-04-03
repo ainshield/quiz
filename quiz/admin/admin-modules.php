@@ -89,7 +89,7 @@ $result = $conn->query($query);
             const cardBody = document.getElementById("module-card-body");
 
             // Generate the correct image URL if available
-            let imageUrl = imageFileName ? `http://localhost/quiz/uploads/${imageFileName}` : '';
+            let imageUrl = imageFileName ? `./uploads/${imageFileName}` : '';
 
             cardBody.innerHTML = `
                 <h5>${moduleId ? 'Edit Module' : 'Add New Module'}</h5>
@@ -99,7 +99,7 @@ $result = $conn->query($query);
                 
                 <label class="mt-2">Upload Image:</label>
 
-                ${imageUrl ? `<button class="btn btn-info mt-2" onclick="viewImage(${imageUrl})">View Image</button>` : ''}
+                ${imageUrl ? `<button class="btn btn-info mt-2" onclick="viewImage('${imageUrl}')">View Image</button>` : ''}
 
                 <div class="d-flex align-items-center mt-2">
                     <input type="file" id="module-image" class="form-control mt-2">
