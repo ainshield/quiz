@@ -31,7 +31,7 @@ $result = $conn->query($query);
                 .replace(/\n/g, "<br>")   
                 .replace(/\t/g, "&nbsp;&nbsp;&nbsp;&nbsp;");
 
-            let imageUrl = imageFileName ? `http://localhost/quiz/uploads/${imageFileName}` : "";
+            let imageUrl = imageFileName ? `../uploads/${imageFileName}` : "";
             let imageHtml = imageFileName ? `<img src="${imageUrl}" alt="Module Image" style="max-width: 100%; margin-top: 10px;">` : "";
 
             document.getElementById("moduleTitle").innerText = moduleName; 
